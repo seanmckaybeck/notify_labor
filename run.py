@@ -18,6 +18,7 @@ PHRASE = parser.get('general', 'secret')
 DEADLINE = float(parser.get('general', 'deadline'))
 PHONE = parser.get('general', 'number')
 app = Flask(__name__)
+utils.init_db()
 
 
 @app.route('/', methods=['GET', 'POST'])
