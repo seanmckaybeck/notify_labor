@@ -13,7 +13,7 @@ to later. These recordings can then be downloaded by the owner and saved for lat
 ## Configuration
 
 Create an account with Twilio and buy a number. Create a server that is publicly accessible on the internet and
-download this repo to it. Install the dependencies using `pip`: `pip install -r requirements.tx`. You should
+download this repo to it. Install the dependencies using `pip`: `pip install -r requirements.txt`. You should
 ideally do this in a virtual environment using `virtualenv`.
 
 Notice the file called `config.ini`. The following describes what each of the parameters should be:  
@@ -26,6 +26,11 @@ Notice the file called `config.ini`. The following describes what each of the pa
 * `authtoken`: Your Twilio authentication token, found on your user account page
 
 All of these values need to be set for the application to work.
+
+Finally, within Twilio you must tell it the URL to use to connect to your application. For the phone, enter
+`http://yourip:yourport/` and for SMS enter `http://yourip:yourport/notify`, where `yourip` is the IP address of your
+server and `yourport` is the port your application is running on as specified in the configuration file. This can all
+be done under `Account -> Numbers -> The Number`.
 
 ### Deadline
 
