@@ -5,7 +5,7 @@ import time
 
 
 DB_NAME = 'numbers.db'
-SCHEMA = 'create table numbers (id integer primary key autoincrement not null,number text not null'
+SCHEMA = 'create table numbers (id integer primary key autoincrement not null,number text not null)'
 
 
 def init_db():
