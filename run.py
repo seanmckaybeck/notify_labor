@@ -59,6 +59,9 @@ def save_number():
 
 @app.route('/notify', methods=['GET', 'POST'])
 def notify():
+    print request.form['Body']
+    print PHRASE
+    print request.form['Body'] == PHRASE
     if request.form['Body'].strip().rstrip() == PHRASE:
         client = TwilioRestClient(SID, AUTH)
         numbers = utils.get_all_numbers()
