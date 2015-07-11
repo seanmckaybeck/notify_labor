@@ -106,11 +106,14 @@ def record():
 @app.route('/api/handle_recording', methods=['GET', 'POST'])
 def handle_recording():
     recording_url = request.values.get('RecordingUrl', None)
+    print recording_url
     resp = twilio.twiml.Response()
     resp.say('Thank you for leaving a message! Goodbye.', voice='female')
     resp.hangup()
     f = urllib.URLopener()
+    print 'about to retrieve'
     f.urlretrieve(recording_url+'.mp3', 'recordings/'+recording_url.rsplit('/', 1)+'.mp3')
+    print 'done retrieving'
     return str(resp)
 
 
