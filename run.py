@@ -59,13 +59,13 @@ def save_number():
 
 @app.route('/notify', methods=['GET', 'POST'])
 def notify():
-    print request.form['Body']
-    print PHRASE
-    print request.form['Body'] == PHRASE
-    if request.form['Body'].strip().rstrip() == PHRASE:
+    if request.form['Body'] == PHRASE:
+        print 'in block'
         client = TwilioRestClient(SID, AUTH)
         numbers = utils.get_all_numbers()
+        print numbers
         for number in numbers:
+            print number
             client.calls.create(to=number, from_=PHONE, url='/api/notify')
         resp = twilio.twiml.Response()
         resp.message('Finished notifying all {} numbers'.format(len(numbers)))
