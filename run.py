@@ -112,7 +112,7 @@ def handle_recording():
     resp.hangup()
     f = urllib.URLopener()
     print 'about to retrieve'
-    filename = recording_url.rsplit('/', 1)+'.mp3'
+    filename = recording_url.rsplit('/', 1)[1]+'.mp3'
     print filename
     filename = 'recordings/'+filename
     f.urlretrieve(recording_url+'.mp3', filename)
