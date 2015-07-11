@@ -21,6 +21,7 @@ IP = parser.get('general', 'ip')
 PORT = parser.get('general', 'port')
 app = Flask(__name__)
 utils.init_db()
+utils.make_recordings_directory()
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -109,8 +110,7 @@ def handle_recording():
     resp = twilio.twiml.Response()
     resp.say('Thank you for leaving a message! Goodbye.', voice='female')
     resp.hangup()
-    filename = recording_url.rsplit('/', 1)[1]+'.mp3'
-    filename = 'recordings/'+filename
+    filename = 'recordings/'+request.values.get('To', None)+'.mp3'
     urllib.urlretrieve(recording_url+'.mp3', filename)
     return str(resp)
 
