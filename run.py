@@ -17,6 +17,8 @@ AUTH = parser.get('twilio', 'authtoken')
 PHRASE = parser.get('general', 'secret')
 DEADLINE = float(parser.get('general', 'deadline'))
 PHONE = parser.get('general', 'number')
+IP = parser.get('general', 'ip')
+PORT = parser.get('general', 'port')
 app = Flask(__name__)
 utils.init_db()
 
@@ -60,13 +62,10 @@ def save_number():
 @app.route('/notify', methods=['GET', 'POST'])
 def notify():
     if request.form['Body'] == PHRASE:
-        print 'in block'
         client = TwilioRestClient(SID, AUTH)
         numbers = utils.get_all_numbers()
-        print numbers
         for number in numbers:
-            print number
-            client.calls.create(to=number, from_=PHONE, url='/api/notify')
+            client.calls.create(to=number, from_=PHONE, url='http://'+IP+':'+PORT+'/api/notify')
         resp = twilio.twiml.Response()
         resp.message('Finished notifying all {} numbers'.format(len(numbers)))
         return str(resp)
@@ -116,4 +115,4 @@ def handle_recording():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=7778)
+    app.run(host='0.0.0.0', port=int(PORT))
