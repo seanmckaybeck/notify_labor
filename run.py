@@ -1,5 +1,4 @@
 import urllib
-from ConfigParser import SafeConfigParser
 
 import twilio.twiml
 from twilio.rest import TwilioRestClient
@@ -10,16 +9,8 @@ from flask import redirect
 import utils
 
 
-parser = SafeConfigParser()
-parser.read('config.ini')
-SID = parser.get('twilio', 'sid')
-AUTH = parser.get('twilio', 'authtoken')
-PHRASE = parser.get('general', 'secret')
-DEADLINE = float(parser.get('general', 'deadline'))
-PHONE = parser.get('general', 'number')
-IP = parser.get('general', 'ip')
-PORT = parser.get('general', 'port')
 app = Flask(__name__)
+app.config.from_pyfile('config.py')
 utils.init_db()
 utils.make_recordings_directory()
 
@@ -41,7 +32,7 @@ def index():
 def register():
     resp = twilio.twiml.Response()
     with resp.gather(numDigits=10, action='/api/save_number', method='POST') as g:
-        g.say('To register to receive a phone call once labor begins, please enter your '\
+        g.say('To register to receive a phone call once the baby is born, please enter your '\
               'phone number. Enter the 3 digit area code, followed by the 7 digit number', voice='female')
     return str(resp)
 
@@ -62,11 +53,12 @@ def save_number():
 
 @app.route('/notify', methods=['GET', 'POST'])
 def notify():
-    if request.form['Body'] == PHRASE:
-        client = TwilioRestClient(SID, AUTH)
+    if request.form['Body'] == app.config['PHRASE']:
+        client = TwilioRestClient(app.config['SID'], app.config['AUTH'])
         numbers = utils.get_all_numbers()
         for number in numbers:
-            client.calls.create(to=number, from_=PHONE, url='http://'+IP+':'+PORT+'/api/notify')
+            client.calls.create(to=number, from_=app.config['PHONE'],
+                                url='http://'+app.config['IP']+':'+app.config['PORT']+'/api/notify')
         resp = twilio.twiml.Response()
         resp.message('Finished notifying all {} numbers'.format(len(numbers)))
         return str(resp)
@@ -75,8 +67,8 @@ def notify():
 @app.route('/api/notify', methods=['GET', 'POST'])
 def notify_number():
     resp = twilio.twiml.Response()
-    resp.say('This phone call is to notify you that labor has begun. You will not receive a '\
-             'notification from this number when labor is complete.', voice='female')
+    resp.say('This phone call is to notify you that Shalie Beck has finished labor.'\
+             'Please don\'t bother calling as they most likely will not answer..', voice='female')
     with resp.gather(numDigits=1, action='/api/record_menu', method='POST') as g:
         g.say('If you would like to leave a message for the happy couple, please press 1. '\
               'If you do not wish to leave a message, press 2.', voice='female')
@@ -100,7 +92,7 @@ def record():
     resp = twilio.twiml.Response()
     resp.say('Record your message after the tone. Make sure to state your name, and note '\
              'that the recording is only 30 seconds.', voice='female')
-    resp.record(maxLength='20', action='/api/handle_recording')
+    resp.record(maxLength='30', action='/api/handle_recording')
     return str(resp)
 
 
@@ -116,4 +108,5 @@ def handle_recording():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(PORT))
+    app.run(host='0.0.0.0', port=app.config['PORT'])
+
