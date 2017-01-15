@@ -19,12 +19,7 @@ utils.make_recordings_directory()
 def index():
     resp = twilio.twiml.Response()
     resp.say('Welcome to the Labor Notifier.', voice='female')
-    stamp = utils.get_timestamp()
-    if stamp <= DEADLINE:
-        resp.redirect(url='/api/register')
-    else:
-        resp.say('I\'m sorry, but the registration period has ended. Goodbye.', voice='female')
-        resp.hangup()
+    resp.redirect(url='/api/register')
     return str(resp)
 
 

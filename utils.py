@@ -34,12 +34,7 @@ def get_all_numbers():
         return [row[0] for row in numbers]
 
 
-def get_timestamp():
-    dt = datetime.datetime.now()
-    stamp = time.mktime(dt.timetuple())
-    return stamp
-
-
 def make_recordings_directory():
     if not os.path.exists('recordings'):
         os.mkdir('recordings')
+
