@@ -46,21 +46,41 @@ def confirm_route():
     digit = request.args.get('Digits', None)
     if digit == '1':
         number = request.args.get('number', None)
-        resp.redirect(url=url_for('save_number', number=number), method='GET')
+        resp.redirect(url=url_for('text_or_call', number=number), method='GET')
         return str(resp)
     else:
         resp.redirect(url=url_for('register'))
         return str(resp)
 
 
+@app.route('/api/text_or_call')
+def text_or_call():
+    resp = twilio.twiml.Response()
+    number = request.args.get('number', None)
+    with resp.gather(numDigits=1, action=url_for('save_number', number=number), method='GET') as g:
+        g.say('If you would like to receive a text message, press 1. If you would like to receive a' \
+              ' phone call, press 2.')
+    return str(resp)
+
+
 @app.route('/api/save_number')
 def save_number():
     resp = twilio.twiml.Response()
-    digits = request.args.get('number', None)
-    digits_spaced = ' '.join(ch for ch in digits)
-    digits = '+1' + digits
-    utils.insert_to_db(digits)
-    resp.say('Thank you. You will receive a phone call at that number once labor begins.', voice='female')
+    digit = request.args.get('Digits', None)
+    number = request.args.get('number', None)
+    text = None
+    if digit == '1':
+        text = True
+    elif digit == '2':
+        text = False
+    else:
+        resp.say(digit+' is not a valid choice.')
+        resp.redirect(url_for('text_or_call', number=number), method='GET')
+        return str(resp)
+    number_spaced = ' '.join(ch for ch in number)
+    number = '+1' + number
+    utils.insert_to_db(number, text)
+    resp.say('Thank you. You will receive a notification at that number once the baby is born.', voice='female')
     resp.say('Goodbye.', voice='female')
     resp.hangup()
     return str(resp)
@@ -72,8 +92,12 @@ def notify():
         client = TwilioRestClient(app.config['SID'], app.config['AUTHTOKEN'])
         numbers = utils.get_all_numbers()
         for number in numbers:
-            client.calls.create(to=number, from_=app.config['NUMBER'],
-                                url='http://'+app.config['IP']+':'+str(app.config['PORT'])+'/api/notify')
+            if number[1] == 0:
+                client.calls.create(to=number[0], from_=app.config['NUMBER'],
+                                    url='http://'+app.config['IP']+':'+str(app.config['PORT'])+'/api/notify')
+            else:
+                client.messages.create(to=number[0], from_=app.config['NUMBER'],
+                                       body=app.config['TEXT_NOTIFICATION'])
         resp = twilio.twiml.Response()
         resp.message('Finished notifying all {} numbers'.format(len(numbers)))
         return str(resp)
@@ -83,7 +107,7 @@ def notify():
 @app.route('/api/notify', methods=['GET', 'POST'])
 def notify_number():
     resp = twilio.twiml.Response()
-    resp.say(app.config['NOTIFICATION'], voice='female')
+    resp.say(app.config['CALL_NOTIFICATION'], voice='female')
     with resp.gather(numDigits=1, action=url_for('record_menu'), method='POST') as g:
         g.say('If you would like to leave a message for the happy couple, please press 1. '\
               'If you do not wish to leave a message, press 2.', voice='female')

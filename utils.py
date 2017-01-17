@@ -5,7 +5,7 @@ import time
 
 
 DB_NAME = 'numbers.db'
-SCHEMA = 'create table numbers (id integer primary key autoincrement not null,number text not null)'
+SCHEMA = 'create table numbers (id integer primary key autoincrement not null,number text not null,text integer not null)'
 
 
 def init_db():
@@ -16,22 +16,23 @@ def init_db():
             conn.commit()
 
 
-def insert_to_db(number):
+def insert_to_db(number: str, text: bool):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT id FROM numbers WHERE number = ?', (number,))
         data = cursor.fetchone()
         if not data:
-            cursor.execute('INSERT INTO numbers (number) values (?)', (number,))
+            text = 1 if text else 0
+            cursor.execute('INSERT INTO numbers (number, text) values (?,?)', (number, text))
             conn.commit()
 
 
 def get_all_numbers():
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT number FROM numbers')
+        cursor.execute('SELECT number, text FROM numbers')
         numbers = cursor.fetchall()
-        return [row[0] for row in numbers]
+        return numbers
 
 
 def make_recordings_directory():

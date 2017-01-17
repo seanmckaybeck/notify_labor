@@ -4,4 +4,5 @@ PORT = 1234                         # the port your app will run on
 IP = '127.0.0.1'                    # the public IP of your machine running the app
 SID = 'yourtwiliosid'               # your twilio sid
 AUTHTOKEN = 'yourtwilioauthtoken'   # your twilio auth token
-NOTIFICATION = ''                   # the message to play to users when they get a call
+CALL_NOTIFICATION = ''              # the message to deliver to users via call
+TEXT_NOTIFICATION = ''              # the message to deliver to users via text
