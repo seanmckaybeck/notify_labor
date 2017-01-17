@@ -1,11 +1,10 @@
-import urllib
-
 import twilio.twiml
 from twilio.rest import TwilioRestClient
 from flask import Flask
 from flask import request
 from flask import redirect
 from flask import url_for
+import requests
 
 import utils
 
@@ -70,14 +69,15 @@ def save_number():
 @app.route('/notify', methods=['GET', 'POST'])
 def notify():
     if request.form['Body'] == app.config['PHRASE']:
-        client = TwilioRestClient(app.config['SID'], app.config['AUTH'])
+        client = TwilioRestClient(app.config['SID'], app.config['AUTHTOKEN'])
         numbers = utils.get_all_numbers()
         for number in numbers:
-            client.calls.create(to=number, from_=app.config['PHONE'],
-                                url='http://'+app.config['IP']+':'+app.config['PORT']+'/api/notify')
+            client.calls.create(to=number, from_=app.config['NUMBER'],
+                                url='http://'+app.config['IP']+':'+str(app.config['PORT'])+'/api/notify')
         resp = twilio.twiml.Response()
         resp.message('Finished notifying all {} numbers'.format(len(numbers)))
         return str(resp)
+    return ''
 
 
 @app.route('/api/notify', methods=['GET', 'POST'])
@@ -106,8 +106,8 @@ def record_menu():
 def record():
     resp = twilio.twiml.Response()
     resp.say('Record your message after the tone. Make sure to state your name, and note '\
-             'that the recording is only 30 seconds.', voice='female')
-    resp.record(maxLength='30', action=url_for('handle_recording'))
+             'that the recording is only 30 seconds. When done, press the pound sign.', voice='female')
+    resp.record(maxLength='30', action=url_for('handle_recording'), finishOnKey='#')
     return str(resp)
 
 
@@ -118,7 +118,10 @@ def handle_recording():
     resp.say('Thank you for leaving a message! Goodbye.', voice='female')
     resp.hangup()
     filename = 'recordings/'+request.values.get('To', None)+'.mp3'
-    urllib.urlretrieve(recording_url+'.mp3', filename)
+    r = requests.get(recording_url+'.mp3', stream=True)
+    with open(filename, 'wb') as fd:
+        for chunk in r.iter_content():
+            fd.write(chunk)
     return str(resp)
 
 
