@@ -16,17 +16,15 @@ utils.init_db()
 utils.make_recordings_directory()
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    resp = twilio.twiml.Response()
-    resp.say('Welcome to the Labor Notifier.', voice='female')
-    resp.redirect(url=url_for('register'))
-    return str(resp)
+    return 'go away'
 
 
 @app.route('/api/register', methods=['GET', 'POST'])
 def register():
     resp = twilio.twiml.Response()
+    resp.say('Welcome to the Labor Notifier.', voice='female')
     with resp.gather(numDigits=10, action=url_for('confirm'), method='POST') as g:
         g.say('To register to receive a phone call once the baby is born, please enter your '\
               'phone number. Enter the 3 digit area code, followed by the 7 digit number', voice='female')
