@@ -47,7 +47,7 @@ def confirm_route():
     digit = request.args.get('Digits', None)
     if digit == '1':
         number = request.args.get('number', None)
-        resp.redirect(url=url_for('save_number', number=number))
+        resp.redirect(url=url_for('save_number', number=number), method='GET')
         return str(resp)
     else:
         resp.redirect(url=url_for('register'))
