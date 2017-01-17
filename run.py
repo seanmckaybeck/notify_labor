@@ -5,6 +5,7 @@ from twilio.rest import TwilioRestClient
 from flask import Flask
 from flask import request
 from flask import redirect
+from flask import url_for
 
 import utils
 
@@ -19,17 +20,41 @@ utils.make_recordings_directory()
 def index():
     resp = twilio.twiml.Response()
     resp.say('Welcome to the Labor Notifier.', voice='female')
-    resp.redirect(url='/api/register')
+    resp.redirect(url=url_for('register'))
     return str(resp)
 
 
 @app.route('/api/register', methods=['GET', 'POST'])
 def register():
     resp = twilio.twiml.Response()
-    with resp.gather(numDigits=10, action='/api/save_number', method='POST') as g:
+    with resp.gather(numDigits=10, action=url_for('confirm'), method='POST') as g:
         g.say('To register to receive a phone call once the baby is born, please enter your '\
               'phone number. Enter the 3 digit area code, followed by the 7 digit number', voice='female')
     return str(resp)
+
+
+@app.route('/api/confirm', methods=['GET', 'POST'])
+def confirm():
+    resp = twilio.twiml.Response()
+    digits = request.values.get('Digits', None)
+    digits_spaced = ' '.join(ch for ch in digits)
+    with resp.gather(numDigits=1, action=url_for('confirm_route'), method='POST') as g:
+        g.say('You entered the number ' + digits_spaced + '. If this is correct, press 1. Otherwise, press 2.')
+    # TODO pass original digits to save_number
+    return str(resp)
+
+
+@app.route('/api/confirm_route', methods=['GET', 'POST'])
+def confirm_route():
+    resp = twilio.twiml.Response()
+    digit = request.values.get('Digits', None)
+    if digit == '1':
+        resp.redirect(url=url_for('save_number'))
+        # TODO send digits to save_number
+        return str(resp)
+    else:
+        resp.redirect(url=url_for('register'))
+        return str(resp)
 
 
 @app.route('/api/save_number', methods=['GET', 'POST'])
@@ -38,7 +63,7 @@ def save_number():
     digits = request.values.get('Digits', None)
     digits_spaced = ' '.join(ch for ch in digits)
     digits = '+1' + digits
-    resp.say('You entered the number ' + digits_spaced, voice='female')
+    # TODO check if number already in db
     utils.insert_to_db(digits)
     resp.say('Thank you. You will receive a phone call at that number once labor begins.', voice='female')
     resp.say('Goodbye.', voice='female')
@@ -62,9 +87,8 @@ def notify():
 @app.route('/api/notify', methods=['GET', 'POST'])
 def notify_number():
     resp = twilio.twiml.Response()
-    resp.say('This phone call is to notify you that Shalie Beck has finished labor.'\
-             'Please don\'t bother calling as they most likely will not answer..', voice='female')
-    with resp.gather(numDigits=1, action='/api/record_menu', method='POST') as g:
+    resp.say(app.config['NOTIFICATION'], voice='female')
+    with resp.gather(numDigits=1, action=url_for('record_menu'), method='POST') as g:
         g.say('If you would like to leave a message for the happy couple, please press 1. '\
               'If you do not wish to leave a message, press 2.', voice='female')
     return str(resp)
@@ -74,7 +98,7 @@ def notify_number():
 def record_menu():
     digit = request.values.get('Digits', None)
     if digit == '1':
-        return redirect('/api/record')
+        return redirect(url_for('record'))
     else:
         resp = twilio.twiml.Response()
         resp.say('Thank you. Goodbye.', voice='female')
@@ -87,7 +111,7 @@ def record():
     resp = twilio.twiml.Response()
     resp.say('Record your message after the tone. Make sure to state your name, and note '\
              'that the recording is only 30 seconds.', voice='female')
-    resp.record(maxLength='30', action='/api/handle_recording')
+    resp.record(maxLength='30', action=url_for('handle_recording'))
     return str(resp)
 
 
