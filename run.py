@@ -38,32 +38,30 @@ def confirm():
     resp = twilio.twiml.Response()
     digits = request.values.get('Digits', None)
     digits_spaced = ' '.join(ch for ch in digits)
-    with resp.gather(numDigits=1, action=url_for('confirm_route'), method='POST') as g:
+    with resp.gather(numDigits=1, action=url_for('confirm_route', number=digits), method='GET') as g:
         g.say('You entered the number ' + digits_spaced + '. If this is correct, press 1. Otherwise, press 2.')
-    # TODO pass original digits to save_number
     return str(resp)
 
 
-@app.route('/api/confirm_route', methods=['GET', 'POST'])
+@app.route('/api/confirm_route')
 def confirm_route():
     resp = twilio.twiml.Response()
-    digit = request.values.get('Digits', None)
+    digit = request.args.get('Digits', None)
     if digit == '1':
-        resp.redirect(url=url_for('save_number'))
-        # TODO send digits to save_number
+        number = request.args.get('number', None)
+        resp.redirect(url=url_for('save_number', number=number))
         return str(resp)
     else:
         resp.redirect(url=url_for('register'))
         return str(resp)
 
 
-@app.route('/api/save_number', methods=['GET', 'POST'])
+@app.route('/api/save_number')
 def save_number():
     resp = twilio.twiml.Response()
-    digits = request.values.get('Digits', None)
+    digits = request.args.get('number', None)
     digits_spaced = ' '.join(ch for ch in digits)
     digits = '+1' + digits
-    # TODO check if number already in db
     utils.insert_to_db(digits)
     resp.say('Thank you. You will receive a phone call at that number once labor begins.', voice='female')
     resp.say('Goodbye.', voice='female')
