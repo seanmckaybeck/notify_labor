@@ -12,6 +12,8 @@ It will also provide an option for the user receiving a call to leave a message 
 These recordings can then be downloaded by the owner and saved for later.
 Alternatively, the user may get a text message.
 When a user signs up for the service, he or she chooses to receive a phone call or a text message.
+The message used is specified by the owner of the service when the notify text is sent.
+If your secret phrase is "secret", then to begin the notification process you would text the number "secret your message goes here".
 
 ## Configuration
 
@@ -41,3 +43,4 @@ Make sure once you have the baby you stop running your instance of the applicati
 ## License
 
 See LICENSE.md
+
