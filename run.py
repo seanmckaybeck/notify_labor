@@ -13,6 +13,7 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 utils.init_db()
 utils.make_recordings_directory()
+MESSAGE = ''
 
 
 @app.route('/')
@@ -88,7 +89,9 @@ def save_number():
 
 @app.route('/notify', methods=['GET', 'POST'])
 def notify():
-    if request.form['Body'] == app.config['PHRASE']:
+    global MESSAGE
+    if request.form['Body'].startswith(app.config['PHRASE']):
+        MESSAGE = request.form['Body'].replace(app.config['PHRASE'], '')
         client = TwilioRestClient(app.config['SID'], app.config['AUTHTOKEN'])
         numbers = utils.get_all_numbers()
         for number in numbers:
@@ -97,7 +100,7 @@ def notify():
                                     url=app.config['URL']+'/api/notify')
             else:
                 client.messages.create(to=number[0], from_=app.config['NUMBER'],
-                                       body=app.config['TEXT_NOTIFICATION'])
+                                       body=MESSAGE)
         resp = twilio.twiml.Response()
         resp.message('Finished notifying all {} numbers'.format(len(numbers)))
         return str(resp)
@@ -107,7 +110,7 @@ def notify():
 @app.route('/api/notify', methods=['GET', 'POST'])
 def notify_number():
     resp = twilio.twiml.Response()
-    resp.say(app.config['CALL_NOTIFICATION'], voice='female')
+    resp.say(MESSAGE, voice='female')
     with resp.gather(numDigits=1, action=url_for('record_menu'), method='POST') as g:
         g.say('If you would like to leave a message for the happy couple, please press 1. '\
               'If you do not wish to leave a message, press 2.', voice='female')
