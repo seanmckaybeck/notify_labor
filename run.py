@@ -94,7 +94,7 @@ def notify():
         for number in numbers:
             if number[1] == 0:
                 client.calls.create(to=number[0], from_=app.config['NUMBER'],
-                                    url='http://'+app.config['IP']+':'+str(app.config['PORT'])+'/api/notify')
+                                    url=app.config['URL']+'/api/notify')
             else:
                 client.messages.create(to=number[0], from_=app.config['NUMBER'],
                                        body=app.config['TEXT_NOTIFICATION'])
