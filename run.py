@@ -14,6 +14,7 @@ app.config.from_pyfile('config.py')
 utils.init_db()
 utils.make_recordings_directory()
 MESSAGE = ''
+voice = 'alice'
 
 
 @app.route('/')
@@ -24,10 +25,10 @@ def index():
 @app.route('/api/register', methods=['GET', 'POST'])
 def register():
     resp = twilio.twiml.Response()
-    resp.say('Welcome to the Bee Bee Baker Notifier.', voice='female')
+    resp.say('Welcome to the Bee Bee Baker Notifier.', voice=voice)
     with resp.gather(numDigits=10, action=url_for('confirm'), method='POST') as g:
         g.say('To register to receive a phone call once the baby is born, please enter your '\
-              'phone number starting with the 3 digit area code, followed by the 7 digit number', voice='female')
+              'phone number starting with the 3 digit area code, followed by the 7 digit number', voice=voice)
     return str(resp)
 
 
@@ -81,8 +82,8 @@ def save_number():
     number_spaced = ' '.join(ch for ch in number)
     number = '+1' + number
     utils.insert_to_db(number, text)
-    resp.say('Thank you. You will receive a notification at that number once the baby is born.', voice='female')
-    resp.say('Goodbye.', voice='female')
+    resp.say('Thank you. You will receive a notification at that number once the baby is born.', voice=voice)
+    resp.say('Goodbye.', voice=voice)
     resp.hangup()
     return str(resp)
 
@@ -135,10 +136,10 @@ def notify():
 @app.route('/api/notify', methods=['GET', 'POST'])
 def notify_number():
     resp = twilio.twiml.Response()
-    resp.say(MESSAGE, voice='female')
+    resp.say('Hello. ' + MESSAGE, voice=voice)
     with resp.gather(numDigits=1, action=url_for('record_menu'), method='POST') as g:
         g.say('If you would like to leave a message for the happy couple, please press 1. '\
-              'If you do not wish to leave a message, press 2.', voice='female')
+              'If you do not wish to leave a message, press 2.', voice=voice)
     return str(resp)
 
 
@@ -149,7 +150,7 @@ def record_menu():
         return redirect(url_for('record'))
     else:
         resp = twilio.twiml.Response()
-        resp.say('Thank you. Goodbye.', voice='female')
+        resp.say('Thank you. Goodbye.', voice=voice)
         resp.hangup()
         return str(resp)
 
@@ -158,7 +159,7 @@ def record_menu():
 def record():
     resp = twilio.twiml.Response()
     resp.say('Record your message after the tone. Make sure to state your name, and note '\
-             'that the recording is only 30 seconds. When done, press the pound sign.', voice='female')
+             'that the recording is only 30 seconds. When done, press the pound sign.', voice=voice)
     resp.record(maxLength='30', action=url_for('handle_recording'), finishOnKey='#')
     return str(resp)
 
@@ -167,7 +168,7 @@ def record():
 def handle_recording():
     recording_url = request.values.get('RecordingUrl', None)
     resp = twilio.twiml.Response()
-    resp.say('Thank you for leaving a message! Goodbye.', voice='female')
+    resp.say('Thank you for leaving a message! Goodbye.', voice=voice)
     resp.hangup()
     filename = 'recordings/'+request.values.get('To', None)+'.mp3'
     r = requests.get(recording_url+'.mp3', stream=True)
