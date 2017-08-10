@@ -118,8 +118,9 @@ def notify():
         return str(resp)
 
     if request.form['Body'].lower().startswith('join'):
-        utils.insert_to_db(request.form['From'], True)
-        client.messages.create(request.form['From'], from_=app.config['NUMBER'],
+        number = request.form['From']
+        utils.insert_to_db(number, True)
+        client.messages.create(number, from_=app.config['NUMBER'],
             body='You have been added to the notification list!')
 
     return ''
