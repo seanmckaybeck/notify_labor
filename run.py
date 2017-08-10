@@ -92,6 +92,7 @@ def notify():
     global MESSAGE
     sendmessage = False
     born = False
+    client = TwilioRestClient(app.config['SID'], app.config['AUTHTOKEN'])
 
     if request.form['Body'].startswith(app.config['PHRASE']):
         MESSAGE = request.form['Body'].replace(app.config['PHRASE'], '')
@@ -103,7 +104,6 @@ def notify():
         born = True
 
     if sendmessage:
-        client = TwilioRestClient(app.config['SID'], app.config['AUTHTOKEN'])
         numbers = utils.get_all_numbers()
         for number in numbers:
             if number[1] == 0:
@@ -116,6 +116,12 @@ def notify():
         resp = twilio.twiml.Response()
         resp.message('Finished notifying all {} numbers'.format(len(numbers)))
         return str(resp)
+
+    if request.form['Body'].lower().startswith('join'):
+        utils.insert_to_db(request.form['From'], True)
+        client.messages.create(request.form['From'], from_=app.config['NUMBER'],
+            body='You have been added to the notification list!')
+
     return ''
 
 
