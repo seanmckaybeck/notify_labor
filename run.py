@@ -111,8 +111,10 @@ def notify():
                     client.calls.create(to=number[0], from_=app.config['NUMBER'],
                                         url=app.config['URL']+'/api/notify')
             else:
-                client.messages.create(to=number[0], from_=app.config['NUMBER'],
-                                       body=MESSAGE)
+                params = {'to': number[0], 'from_': app.config['NUMBER'], 'body': MESSAGE}
+                if request.form['NumMedia'] == '1':
+                    params['MediaUrl'] = request.form['MediaUrl0']
+                client.messages.create(**params)
         resp = twilio.twiml.Response()
         resp.message('Finished notifying all {} numbers'.format(len(numbers)))
         return str(resp)
