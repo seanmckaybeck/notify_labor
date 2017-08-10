@@ -38,7 +38,7 @@ def confirm():
     digits = request.values.get('Digits', None)
     digits_spaced = ' '.join(ch for ch in digits)
     with resp.gather(numDigits=1, action=url_for('confirm_route', number=digits), method='GET') as g:
-        g.say('You entered the number ' + digits_spaced + '. If this is correct, press 1. Otherwise, press 2.')
+        g.say('You entered the number ' + digits_spaced + '. If this is correct, press 1. Otherwise, press 2.', voice=voice)
     return str(resp)
 
 
@@ -61,7 +61,7 @@ def text_or_call():
     number = request.args.get('number', None)
     with resp.gather(numDigits=1, action=url_for('save_number', number=number), method='GET') as g:
         g.say('If you would like to receive a text message, press 1. If you would like to receive a' \
-              ' phone call, press 2.')
+              ' phone call, press 2.', voice=voice)
     return str(resp)
 
 
@@ -136,6 +136,7 @@ def notify():
 @app.route('/api/notify', methods=['GET', 'POST'])
 def notify_number():
     resp = twilio.twiml.Response()
+    resp.pause(1)
     resp.say('Hello. ' + MESSAGE, voice=voice)
     with resp.gather(numDigits=1, action=url_for('record_menu'), method='POST') as g:
         g.say('If you would like to leave a message for the happy couple, please press 1. '\
