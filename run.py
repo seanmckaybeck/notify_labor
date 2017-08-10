@@ -36,7 +36,7 @@ def register():
 def confirm():
     resp = twilio.twiml.Response()
     digits = request.values.get('Digits', None)
-    digits_spaced = ' '.join(ch for ch in digits)
+    digits_spaced = ','.join(ch for ch in digits)
     with resp.gather(numDigits=1, action=url_for('confirm_route', number=digits), method='GET') as g:
         g.say('You entered the number ' + digits_spaced + '. If this is correct, press 1. Otherwise, press 2.', voice=voice)
     return str(resp)
@@ -95,12 +95,12 @@ def notify():
     born = False
     client = TwilioRestClient(app.config['SID'], app.config['AUTHTOKEN'])
 
-    if request.form['Body'].startswith(app.config['PHRASE']):
-        MESSAGE = request.form['Body'].replace(app.config['PHRASE'], '', 1)
+    if request.form['Body'].startswith(app.config['LABOR_PHRASE']):
+        MESSAGE = request.form['Body'].replace(app.config['LABOR_PHRASE'], '', 1)
         sendmessage = True
 
-    if request.form['Body'].startswith(app.config['PHRASE2']):
-        MESSAGE = request.form['Body'].replace(app.config['PHRASE2'], '', 1)
+    if request.form['Body'].startswith(app.config['BORN_PHRASE']):
+        MESSAGE = request.form['Body'].replace(app.config['BORN_PHRASE'], '', 1)
         sendmessage = True
         born = True
 
