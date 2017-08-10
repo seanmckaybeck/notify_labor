@@ -139,8 +139,8 @@ def notify_number():
     resp.pause(length=1)
     resp.say('Hello, this is your Bee Bee Baker update. ' + MESSAGE, voice=voice)
     with resp.gather(numDigits=1, action=url_for('record_menu'), method='POST') as g:
-        g.say('If you would like to leave a message for the happy couple, please press 1. '\
-              'If you do not wish to leave a message, press 2.', voice=voice)
+        g.say('If you would like to leave a message for the happy family, please press 1. '\
+              'If you do not wish to leave a message, you may hang up.', voice=voice)
     return str(resp)
 
 
