@@ -125,7 +125,10 @@ def notify():
         client.messages.create(to=number, from_=app.config['NUMBER'],
             body='You have been added to the notification list!')
 
-    return ''
+    resp = twilio.twiml.Response()
+    resp.message('Megan and Jason are busy right now.  Stay tuned for more updates :)')
+    return str(resp)
+
 
 
 @app.route('/api/notify', methods=['GET', 'POST'])
