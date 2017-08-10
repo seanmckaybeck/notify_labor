@@ -136,7 +136,7 @@ def notify():
 @app.route('/api/notify', methods=['GET', 'POST'])
 def notify_number():
     resp = twilio.twiml.Response()
-    resp.pause(1)
+    resp.pause(length=1)
     resp.say('Hello. ' + MESSAGE, voice=voice)
     with resp.gather(numDigits=1, action=url_for('record_menu'), method='POST') as g:
         g.say('If you would like to leave a message for the happy couple, please press 1. '\
