@@ -24,10 +24,10 @@ def index():
 @app.route('/api/register', methods=['GET', 'POST'])
 def register():
     resp = twilio.twiml.Response()
-    resp.say('Welcome to the Labor Notifier.', voice='female')
+    resp.say('Welcome to the Bee Bee Baker Notifier.', voice='female')
     with resp.gather(numDigits=10, action=url_for('confirm'), method='POST') as g:
         g.say('To register to receive a phone call once the baby is born, please enter your '\
-              'phone number. Enter the 3 digit area code, followed by the 7 digit number', voice='female')
+              'phone number starting with the 3 digit area code, followed by the 7 digit number', voice='female')
     return str(resp)
 
 
@@ -90,14 +90,26 @@ def save_number():
 @app.route('/notify', methods=['GET', 'POST'])
 def notify():
     global MESSAGE
+    sendmessage = False
+    born = False
+
     if request.form['Body'].startswith(app.config['PHRASE']):
         MESSAGE = request.form['Body'].replace(app.config['PHRASE'], '')
+        sendmessage = True
+
+    if request.form['Body'].startswith(app.config['PHRASE2']):
+        MESSAGE = request.form['Body'].replace(app.config['PHRASE2'], '')
+        sendmessage = True
+        born = True
+
+    if sendmessage:
         client = TwilioRestClient(app.config['SID'], app.config['AUTHTOKEN'])
         numbers = utils.get_all_numbers()
         for number in numbers:
             if number[1] == 0:
-                client.calls.create(to=number[0], from_=app.config['NUMBER'],
-                                    url=app.config['URL']+'/api/notify')
+                if born:
+                    client.calls.create(to=number[0], from_=app.config['NUMBER'],
+                                        url=app.config['URL']+'/api/notify')
             else:
                 client.messages.create(to=number[0], from_=app.config['NUMBER'],
                                        body=MESSAGE)
