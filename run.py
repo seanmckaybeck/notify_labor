@@ -25,7 +25,7 @@ def index():
 @app.route('/api/register', methods=['GET', 'POST'])
 def register():
     resp = twilio.twiml.Response()
-    resp.say('Welcome to the Bee Bee Baker Notifier.', voice=voice)
+    resp.say('Welcome to the %s Notifier.' % app.config['BABY_NICKNAME'], voice=voice)
     with resp.gather(numDigits=10, action=url_for('confirm'), method='POST') as g:
         g.say('To register to receive a phone call once the baby is born, please enter your '\
               'phone number starting with the 3 digit area code, followed by the 7 digit number', voice=voice)
@@ -128,7 +128,7 @@ def notify():
         return str(resp)
 
     resp = twilio.twiml.Response()
-    resp.message('Megan and Jason are busy right now.  Stay tuned for more updates :)')
+    resp.message('%s are busy right now.  Stay tuned for more updates :)' % app.config['PARENTS_NAME'])
     return str(resp)
 
 
@@ -137,7 +137,7 @@ def notify():
 def notify_number():
     resp = twilio.twiml.Response()
     resp.pause(length=1)
-    resp.say('Hello, this is your Bee Bee Baker update. ' + MESSAGE, voice=voice)
+    resp.say('Hello, this is your %s update. %s' % (app.config['BABY_NICKNAME'], MESSAGE), voice=voice)
     with resp.gather(numDigits=1, action=url_for('record_menu'), method='POST') as g:
         g.say('If you would like to leave a message for the happy family, please press 1. '\
               'If you do not wish to leave a message, you may hang up.', voice=voice)
