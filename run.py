@@ -124,7 +124,7 @@ def notify():
         number = request.form['From']
         utils.insert_to_db(number, True)
         resp = twilio.twiml.Response()
-        resp.message('You have been signed up for notifications!')
+        resp.message('You have been signed up for %s birth notifications!' % app.config['BABY_NICKNAME'])
         return str(resp)
 
     resp = twilio.twiml.Response()
