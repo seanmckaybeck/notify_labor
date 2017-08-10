@@ -122,8 +122,9 @@ def notify():
     if request.form['Body'].lower().startswith('join'):
         number = request.form['From']
         utils.insert_to_db(number, True)
-        client.messages.create(to=number, from_=app.config['NUMBER'],
-            body='You have been added to the notification list!')
+        resp = twilio.twiml.Response()
+        resp.message('You have been signed up for notifications!')
+        return str(resp)
 
     resp = twilio.twiml.Response()
     resp.message('Megan and Jason are busy right now.  Stay tuned for more updates :)')
