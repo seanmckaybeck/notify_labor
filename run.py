@@ -110,7 +110,7 @@ def notify():
             if number[1] == 0:
                 if born:
                     client.calls.create(to=number[0], from_=app.config['NUMBER'],
-                                        url=app.config['URL']+'/api/notify')
+                                        url=app.config['URL']+':'+str(app.config['PORT'])+'/api/notify')
             else:
                 params = {'to': number[0], 'from_': app.config['NUMBER'], 'body': MESSAGE}
                 if request.form['NumMedia'] == '1':
